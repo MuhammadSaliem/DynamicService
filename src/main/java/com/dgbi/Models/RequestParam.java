@@ -5,12 +5,15 @@ public class RequestParam {
     String type;
     boolean isMandatory;
 
+    String param_type;
+
     public RequestParam(){}
 
-    public RequestParam(String ref, String type, boolean isMandatory) {
+    public RequestParam(String ref, String type, boolean isMandatory, String param_type) {
         this.param_name = ref;
         this.type = type;
         this.isMandatory = isMandatory;
+        this.param_type = param_type;
     }
 
     public String getParam_name() {
@@ -35,5 +38,13 @@ public class RequestParam {
 
     public void setMandatory(boolean mandatory) {
         isMandatory = mandatory;
+    }
+
+    public String getParam_type() {
+        return param_type;
+    }
+
+    public void setParam_type(String param_type) {
+        this.param_type = param_type;
     }
 }

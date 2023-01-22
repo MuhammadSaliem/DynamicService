@@ -1,9 +1,5 @@
 package com.dgbi.Json;
 
-import com.dgbi.Models.Request;
-import com.dgbi.Models.RequestParam;
-import com.dgbi.DAL.DAL;
-import com.dgbi.Engine.Engine;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,6 +15,9 @@ public class Json {
 
 
     private JSONObject jsonObj;
+    private static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_GREEN = "\u001B[32m";
 
     public void createJsonFile() throws FileNotFoundException {
         // creating JSONObject
@@ -111,20 +110,20 @@ public class Json {
         }
     }
 
-    public void createDynamicWebserviceJsonFile() throws FileNotFoundException {
+    public void createDynamicWebserviceJsonFile(String ref, String type, Map request) throws FileNotFoundException {
         JSONObject jo = new JSONObject();
 
         // putting data to JSONObject
-        jo.put("type", "Core");
-        jo.put("ref", "202010");
+        jo.put("type", type);
+        jo.put("ref", ref);
 
-        Map m = new LinkedHashMap(4);
-        m.put("name", "Ahmed");
-        m.put("id", 18102260);
-        m.put("country", "Egypt");
-        m.put("address", "22 Soliman Azmy st. Cairo, Egypt");
+//        Map m = new LinkedHashMap(4);
+//        m.put("name", "Ahmed");
+//        m.put("id", 18102260);
+//        m.put("country", "Egypt");
+//        m.put("address", "22 Soliman Azmy st. Cairo, Egypt");
 
-        jo.put("request", m);
+        jo.put("request", request);
 
 //
 //        // for address data, first create LinkedHashMap
@@ -165,6 +164,8 @@ public class Json {
         pw.close();
 
         jsonObj = jo;
+
+        displaySuccessMessageToConsole("Json created successfully");
     }
 
     public JSONObject readDynamicWebserviceJsonFile(String dir) throws IOException, ParseException {
@@ -177,98 +178,16 @@ public class Json {
         return jo;
     }
 
-    public boolean validateJson(JSONObject jsonObj) throws Exception {
-
-        List<RequestParam> paramList =  new DAL().selectAllParams((String) jsonObj.get("type"));
-
-        // params from DB
-        List<String> typeParams = new DAL().getParamsNames(paramList);
-
-        // params from request
-        List<String> requestParams = new ArrayList<>();
-
-        Map request = ((Map)jsonObj.get("request"));
-        Iterator<Map.Entry> itr1 = request.entrySet().iterator();
-
-        // Validate type params
-        while(itr1.hasNext())
-        {
-            Map.Entry pair = itr1.next();
-
-            //Add keys to a separate list
-            requestParams.add((String)pair.getKey());
-
-            //validate that each request param belongs to the type params
-            if(!typeParams.contains(pair.getKey()))
-            {
-                System.out.println(String.format("The param \"%s\" does not belong to type \"%s\"", pair.getKey().toString(), (String)jsonObj.get("type")));
-                return false;
-            }
-        }
-
-        // Validate mandatory params
-        for(RequestParam param : paramList)
-        {
-            if(param.isMandatory() && !requestParams.contains(param.getParam_name()))
-            {
-                System.out.println("An mandatory param is missing!");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public Request convertJsonToRequestObject(JSONObject obj)
+    private void displayErrorMessageToConsole(String text)
     {
-        Request req = new Request();
-        req.setRef((String)obj.get("ref"));
-        req.setType((String)obj.get("type"));
-
-        String requestParams = ((Map) obj.get("request")).toString();
-        req.setRequestParams(requestParams);
-
-        return req;
+        System.out.println(ANSI_RED + text + ANSI_RESET);
     }
 
-    public String generateQueryString(JSONObject request)
+    private void displaySuccessMessageToConsole(String text)
     {
-        JSONObject obj = new JSONObject();
-        obj.put("username", "Ahmed Elmixicy");
-        obj.put("password", "202010");
-
-        Map req = ((Map)request.get("request"));
-        obj.put("request", req);
-
-        System.out.println("QueryString ... \n" + obj.toString());
-        return obj.toString();
+        System.out.println(ANSI_GREEN + text + ANSI_RESET);
     }
 
-    public void processRequest(JSONObject obj) throws Exception {
-
-        // Cheak if ref already existed
-        String refId = ((String) obj.get("ref"));
-        Request request = new DAL().selectRequest(refId);
-
-        if(request != null)
-        {
-            System.out.println("request already existed!");
-            System.out.println("Terminate ...");
-            return;
-        }
-
-        // validate Json
-        if(validateJson(obj))
-        {
-            String queryString = generateQueryString(obj);
-            new Engine().engineMethod(queryString);
-
-            Request req = convertJsonToRequestObject(obj);
-            new DAL().InsertRequest(req);
-        }
-        else
-            System.out.println("Json file is not valid");
-    }
 }
 
 

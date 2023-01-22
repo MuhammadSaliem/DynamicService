@@ -1,21 +1,40 @@
 package com.dgbi;
 
-import com.dgbi.DAL.DAL;
 import com.dgbi.Json.Json;
-import com.dgbi.Models.Request;
+import com.dgbi.DynamicService.Webservice;
 import org.json.simple.JSONObject;
+
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        DAL dal = new DAL();
-        System.out.println("connection -> " + dal.getConnection().isClosed());
-        System.out.println(dal.selectAllParams("Core"));
+        /*
+         -Display all of missing paramters
 
-//        Json json = new Json();
-//        JSONObject obj = json.readDynamicWebserviceJsonFile("JSONExample.json");
+         -param_type : {identity, name, country, BIC}
 
-//        json.processRequest(obj);
+        -username : "type"
+         */
+
+        // request parameters
+        String ref = "202030";
+        String type= "CORE";
+
+        Map request = new LinkedHashMap(2);
+        request.put("name", "Ahmed");
+        request.put("identity", 18102260);
+        request.put("country", "Egypt");
+
+
+        Json json = new Json();
+        json.createDynamicWebserviceJsonFile(ref, type, request);
+
+        JSONObject obj = json.readDynamicWebserviceJsonFile("JSONExample.json");
+
+        new Webservice().processRequest(obj);
 
     }
 }
