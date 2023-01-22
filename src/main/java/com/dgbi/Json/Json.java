@@ -1,7 +1,9 @@
-package com.dgbi.json;
+package com.dgbi.Json;
 
-import com.dgbi.BL.RequestParam;
+import com.dgbi.Models.Request;
+import com.dgbi.Models.RequestParam;
 import com.dgbi.DAL.DAL;
+import com.dgbi.Engine.Engine;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
-public class JsonFile {
+public class Json {
 
 
     private JSONObject jsonObj;
@@ -165,39 +167,30 @@ public class JsonFile {
         jsonObj = jo;
     }
 
-    public void readDynamicWebserviceJsonFile() throws IOException, ParseException {
+    public JSONObject readDynamicWebserviceJsonFile(String dir) throws IOException, ParseException {
         // parsing file "JSONExample.json"
-        Object obj = new JSONParser().parse(new FileReader("JSONExample.json"));
+        Object obj = new JSONParser().parse(new FileReader(dir));
 
         // typecasting obj to JSONObject
         JSONObject jo = (JSONObject) obj;
 
-        // getting firstName and lastName
-        String type = (String) jo.get("type");
-        String ref = (String) jo.get("ref");
-
-        System.out.println(type);
-        System.out.println(ref);
-
-        // getting Request
-        Map request = ((Map)jo.get("request"));
-
-        // iterating address Map
-        Iterator<Map.Entry> itr1 = request.entrySet().iterator();
-        while (itr1.hasNext()) {
-            Map.Entry pair = itr1.next();
-            System.out.println(pair.getKey() + " : " + pair.getValue());
-        }
+        return jo;
     }
 
     public boolean validateJson(JSONObject jsonObj) throws Exception {
-        List<RequestParam> typeParams =  new DAL().selectAllParams((String) jsonObj.get("type"));
+
+        List<RequestParam> paramList =  new DAL().selectAllParams((String) jsonObj.get("type"));
+
+        // params from DB
+        List<String> typeParams = new DAL().getParamsNames(paramList);
+
+        // params from request
         List<String> requestParams = new ArrayList<>();
 
         Map request = ((Map)jsonObj.get("request"));
         Iterator<Map.Entry> itr1 = request.entrySet().iterator();
 
-        // Validate mandatory params
+        // Validate type params
         while(itr1.hasNext())
         {
             Map.Entry pair = itr1.next();
@@ -205,15 +198,16 @@ public class JsonFile {
             //Add keys to a separate list
             requestParams.add((String)pair.getKey());
 
-            //each param existed in the type params
+            //validate that each request param belongs to the type params
             if(!typeParams.contains(pair.getKey()))
             {
-                System.out.println("The param is not belong the type");
+                System.out.println(String.format("The param \"%s\" does not belong to type \"%s\"", pair.getKey().toString(), (String)jsonObj.get("type")));
                 return false;
             }
         }
 
-        for(RequestParam param : typeParams)
+        // Validate mandatory params
+        for(RequestParam param : paramList)
         {
             if(param.isMandatory() && !requestParams.contains(param.getParam_name()))
             {
@@ -223,6 +217,57 @@ public class JsonFile {
         }
 
         return true;
+    }
+
+    public Request convertJsonToRequestObject(JSONObject obj)
+    {
+        Request req = new Request();
+        req.setRef((String)obj.get("ref"));
+        req.setType((String)obj.get("type"));
+
+        String requestParams = ((Map) obj.get("request")).toString();
+        req.setRequestParams(requestParams);
+
+        return req;
+    }
+
+    public String generateQueryString(JSONObject request)
+    {
+        JSONObject obj = new JSONObject();
+        obj.put("username", "Ahmed Elmixicy");
+        obj.put("password", "202010");
+
+        Map req = ((Map)request.get("request"));
+        obj.put("request", req);
+
+        System.out.println("QueryString ... \n" + obj.toString());
+        return obj.toString();
+    }
+
+    public void processRequest(JSONObject obj) throws Exception {
+
+        // Cheak if ref already existed
+        String refId = ((String) obj.get("ref"));
+        Request request = new DAL().selectRequest(refId);
+
+        if(request != null)
+        {
+            System.out.println("request already existed!");
+            System.out.println("Terminate ...");
+            return;
+        }
+
+        // validate Json
+        if(validateJson(obj))
+        {
+            String queryString = generateQueryString(obj);
+            new Engine().engineMethod(queryString);
+
+            Request req = convertJsonToRequestObject(obj);
+            new DAL().InsertRequest(req);
+        }
+        else
+            System.out.println("Json file is not valid");
     }
 }
 

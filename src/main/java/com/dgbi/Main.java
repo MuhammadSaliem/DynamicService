@@ -1,21 +1,21 @@
 package com.dgbi;
 
 import com.dgbi.DAL.DAL;
-import com.dgbi.json.JsonFile;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import com.dgbi.Json.Json;
+import com.dgbi.Models.Request;
+import org.json.simple.JSONObject;
 
 public class Main {
-    public static void main(String[] args) throws SQLException, IOException, ParseException {
-        new DAL().selectAllParams("Core");
+    public static void main(String[] args) throws Exception {
 
-        JsonFile json = new JsonFile();
-        json.readDynamicWebserviceJsonFile();
-        System.out.println(json.validateJson());
+        DAL dal = new DAL();
+        System.out.println("connection -> " + dal.getConnection().isClosed());
+        System.out.println(dal.selectAllParams("Core"));
 
-//        new JsonFile().createJsonFile();
-//        new JsonFile().readJsonFile();
+//        Json json = new Json();
+//        JSONObject obj = json.readDynamicWebserviceJsonFile("JSONExample.json");
+
+//        json.processRequest(obj);
+
     }
 }

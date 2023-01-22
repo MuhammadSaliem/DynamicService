@@ -1,4 +1,4 @@
-package com.dgbi.BL;
+package com.dgbi.Models;
 
 public class RequestParam {
     String param_name;
