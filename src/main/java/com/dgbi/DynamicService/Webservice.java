@@ -1,6 +1,6 @@
 package com.dgbi.DynamicService;
 
-import com.dgbi.DAL.DAL;
+import com.dgbi.service.Service;
 import com.dgbi.Engine.PartyExtractor;
 import com.dgbi.Models.Request;
 import com.dgbi.Models.RequestParam;
@@ -17,12 +17,21 @@ public class Webservice {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
 
+    // refactoring
     public boolean validateJson(JSONObject jsonObj) throws Exception {
 
-        List<RequestParam> paramList =  new DAL().selectAllParams((String) jsonObj.get("type"));
+
+        // validate type
+        if(!new Service().isTypeExisted((String) jsonObj.get("type")))
+        {
+            displayErrorMessageToConsole(String.format("Type \"%s\" is not exited!", (String) jsonObj.get("type")));
+            return false;
+        }
+
+        List<RequestParam> paramList =  new Service().selectAllParams((String) jsonObj.get("type"));
 
         // params from DB
-        List<String> typeParams = new DAL().getParamsNames(paramList);
+        List<String> typeParams = new Service().getParamsNames(paramList);
 
         // params from request
         List<String> requestParams = new ArrayList<>();
@@ -48,7 +57,8 @@ public class Webservice {
 
         if(!foreignParams.isEmpty())
         {
-            displayErrorMessageToConsole(String.format("The %s parameters do not belong to type \"%s\"", foreignParams.toString(), (String)jsonObj.get("type")));
+            displayErrorMessageToConsole(String.format("The %s "+ (foreignParams.size() > 1 ? "parameters do" : "parameter does") +" not belong to type \"%s\"", foreignParams.toString(), (String)jsonObj.get("type")));
+            return false;
         }
 
 
@@ -75,7 +85,7 @@ public class Webservice {
     public Request convertJsonToRequestObject(JSONObject obj)
     {
         Request req = new Request();
-        req.setRef((String)obj.get("ref"));
+        req.setReference((String)obj.get("ref"));
         req.setType((String)obj.get("type"));
 
         String requestParams = ((Map) obj.get("request")).toString();
@@ -99,7 +109,7 @@ public class Webservice {
 
         // Cheak if ref already existed
         String refId = ((String) obj.get("ref"));
-        Request request = new DAL().selectRequest(refId);
+        Request request = new Service().selectRequest(refId);
 
         if(request != null)
         {
@@ -111,6 +121,7 @@ public class Webservice {
         // validate Json
         if(validateJson(obj))
         {
+            displaySuccessMessageToConsole("Request validated successfully");
             String queryString = generateQueryString(obj);
             /*
                 - type
@@ -120,18 +131,19 @@ public class Webservice {
                 - if type is core use: core_user
                 - call the engine function
             */
-            String source_username = new DAL().selectSourceUsername(((String) obj.get("type")));
+            String source_username = new Service().selectSourceUsername(((String) obj.get("type")));
             String password = "secret";
 
+            System.out.println("QueryString: " + queryString + "\n");
             new PartyExtractor().extractParties(source_username, password , queryString);
 
             Request req = convertJsonToRequestObject(obj);
-            new DAL().InsertRequest(req);
+            new Service().InsertRequest(req);
 
             displaySuccessMessageToConsole("Processed request successfully");
         }
         else
-            displayErrorMessageToConsole("Json file is not valid");
+            displayErrorMessageToConsole("The request is not valid");
 
     }
 

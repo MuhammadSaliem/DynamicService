@@ -1,24 +1,26 @@
 package com.dgbi.Models;
 
-public class Request {
-    String ref;
+import java.io.Serializable;
+
+public class Request implements Serializable {
+    String reference;
     String type;
     String requestParams;
 
     public Request(){}
 
     public Request(String ref, String type, String request) {
-        this.ref = ref;
+        this.reference = ref;
         this.type = type;
         this.requestParams = request;
     }
 
-    public String getRef() {
-        return ref;
+    public String getReference() {
+        return reference;
     }
 
-    public void setRef(String ref) {
-        this.ref = ref;
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     public String getType() {
@@ -35,5 +37,14 @@ public class Request {
 
     public void setRequestParams(String request) {
         this.requestParams = request;
+    }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "ref='" + reference + '\'' +
+                ", type='" + type + '\'' +
+                ", requestParams='" + requestParams + '\'' +
+                '}';
     }
 }
