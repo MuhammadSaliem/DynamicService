@@ -34,14 +34,15 @@ public class Main {
          */
 
         // request parameters
-        String ref = "202052";
-//        String ref = new Random().nextInt(9999,99999) + "";
+//        String ref = "202052";
+        String ref = new Random().nextInt(9999,99999) + "";
         String type = "CASH";
 
         Map request = new LinkedHashMap(4);
         request.put("nationality", "Egypt");
         request.put("party_name", "Ahmed");
         request.put("official_name", "Ahmed");
+        request.put("unknown_param", "unknown");
 //        request.put("Date_Of_Birth", "4/2/1999");
 //        request.put("identity", 18102260);
 //        request.put("country", "Egypt");

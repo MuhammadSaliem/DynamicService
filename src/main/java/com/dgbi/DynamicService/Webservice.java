@@ -39,7 +39,7 @@ public class Webservice {
         Map request = ((Map)jsonObj.get("request"));
         Iterator<Map.Entry> itr1 = request.entrySet().iterator();
 
-        List<String> foreignParams = new ArrayList<>();
+//        List<String> foreignParams = new ArrayList<>();
 
         // Validate type params
         while(itr1.hasNext())
@@ -50,16 +50,16 @@ public class Webservice {
             requestParams.add((String)pair.getKey());
 
             //validate that each request param belongs to the type params
-            if(!typeParams.contains(pair.getKey()))
-                foreignParams.add((String)pair.getKey());
+//            if(!typeParams.contains(pair.getKey()))
+//                foreignParams.add((String)pair.getKey());
 
         }
 
-        if(!foreignParams.isEmpty())
-        {
-            displayErrorMessageToConsole(String.format("The %s "+ (foreignParams.size() > 1 ? "parameters do" : "parameter does") +" not belong to type \"%s\"", foreignParams.toString(), (String)jsonObj.get("type")));
-            return false;
-        }
+//        if(!foreignParams.isEmpty())
+//        {
+//            displayErrorMessageToConsole(String.format("The %s "+ (foreignParams.size() > 1 ? "parameters do" : "parameter does") +" not belong to type \"%s\"", foreignParams.toString(), (String)jsonObj.get("type")));
+//            return false;
+//        }
 
 
         List<String> missingParams = new ArrayList<>();

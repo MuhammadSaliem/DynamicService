@@ -31,6 +31,8 @@ public class PartyExtractor {
             paramKeys.add(pair.getKey().toString());
         }
 
+        // Select only params belong to the type
+        // ignore foreign params
         List<RequestParam> params = new Service().selectRequestParams(paramKeys);
 
         itr1 = request.entrySet().iterator();
@@ -40,13 +42,13 @@ public class PartyExtractor {
 
 
             // optimization
-            String type = params.stream()
+            RequestParam param = params.stream()
                     .filter(p -> p.getParam_name().equals(pair.getKey().toString()))
                     .findFirst()
-                    .orElse(null)
-                    .getParam_type();
+                    .orElse(null);
 
-            parties.add(new Party(type, pair.getValue().toString()));
+            if(param != null)
+              parties.add(new Party(param.getParam_type(), pair.getValue().toString()));
         }
 
         System.out.println(String.format("username: '%s' password: '%s'", username, password));
@@ -95,4 +97,5 @@ public class PartyExtractor {
             System.out.println(String.format("\t%d- {%s : \"%s\"}",i+1 , parties.get(i).getType(), parties.get(i).getValue()));
         }
     }
+
 }
