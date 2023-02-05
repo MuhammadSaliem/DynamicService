@@ -34,8 +34,8 @@ public class Main {
          */
 
         // request parameters
-//        String ref = "202052";
-        String ref = new Random().nextInt(9999,99999) + "";
+        String ref = "202053";
+//        String ref = new Random().nextInt(9999,99999) + "";
         String type = "CASH";
 
         Map request = new LinkedHashMap(4);
@@ -54,8 +54,14 @@ public class Main {
         json.createDynamicWebserviceJsonFile(ref, type, request);
 
         JSONObject obj = json.readDynamicWebserviceJsonFile("JSONExample.json");
-
-        new Webservice().processRequest(obj);
+        try
+        {
+            new Webservice().processRequest(obj);
+        }
+        catch (Exception ex)
+        {
+            System.out.println(ex.getClass().getSimpleName() + " " + ex.getMessage());
+        }
 
 
         //new DAL().testConnection();

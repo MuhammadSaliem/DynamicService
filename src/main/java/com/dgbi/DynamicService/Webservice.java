@@ -25,7 +25,7 @@ public class Webservice {
         if(!new Service().isTypeExisted((String) jsonObj.get("type")))
         {
             displayErrorMessageToConsole(String.format("Type \"%s\" is not exited!", (String) jsonObj.get("type")));
-            return false;
+            throw new IllegalArgumentException(String.format("Type \"%s\" is not exited!", (String) jsonObj.get("type")));
         }
 
         List<RequestParam> paramList =  new Service().selectAllParams((String) jsonObj.get("type"));
@@ -76,7 +76,7 @@ public class Webservice {
         if(missingParams.size() > 0)
         {
             displayErrorMessageToConsole("The following mandatory parameters are missing " + missingParams.toString());
-            return false;
+            throw new Exception("The following mandatory parameters are missing " + missingParams.toString());
         }
 
         return true;
@@ -115,7 +115,7 @@ public class Webservice {
         {
 //            System.out.println("request already existed!");
             displayErrorMessageToConsole("Reference key already existed!");
-            return;
+            throw new NullPointerException("Reference key already existed!");
         }
 
         // validate Json
